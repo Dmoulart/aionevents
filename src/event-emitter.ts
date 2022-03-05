@@ -187,19 +187,24 @@ export class EventEmitter {
    */
   public static Fire(eventName: string, target: EventEmitter, params: Record<string, unknown> = {}): void {
     if (target.instanceEvents[eventName]) {
-      for (let e = 0; e < target.instanceEvents[eventName].length; e++) {
+      const targetLen = target.instanceEvents[eventName].length;
+      for (let e = 0; e < targetLen; e++) {
         target.instanceEvents[eventName][e].callback.call(this, {
           ...params
         });
       }
     }
+    const wiredLen = target.instanceEvents[eventName].length;
 
-    for (let w = 0; w < target.wiredEmitters.length; w++) {
+    for (let w = 0; w < wiredLen; w++) {
       if (!target.wiredEmitters[w].instanceEvents[eventName]) continue;
-      for (let e = 0; e < target.wiredEmitters[w].instanceEvents[eventName].length; e++) {
-        target.wiredEmitters[w].instanceEvents[eventName][e].callback.call(target.wiredEmitters[w], {
-          ...params
-        });
+      const wiredEventsLen = target.wiredEmitters[w].instanceEvents[eventName].length;
+      for (let e = 0; e < wiredEventsLen; e++) {
+        target.wiredEmitters[w].instanceEvents[eventName][e]
+          .callback
+          .call(target.wiredEmitters[w], {
+            ...params
+          });
       }
     }
   }
