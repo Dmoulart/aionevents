@@ -25,19 +25,19 @@ export function Once(hook: string) {
 }
 
 /**
- * Wrap a function to fire an event at the end of it.
+ * Wrap a function to fire an event at the end of it. 
+ * The return value of the function will be passed to the event as arguments.
  *
  * @param hook
- * @param args
  * @returns fire event decorator
  */
-export function Fire(hook: string, args: Record<string, unknown> = {}) {
+export function Fire(hook: string) {
   return function (target: EventEmitter, _propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
     descriptor.value = function (...methodArgs: any[]) {
-      originalMethod.apply(this, methodArgs);
+      const result = originalMethod.apply(this, methodArgs);
       target.wiredEmitters ??= [];
-      target.fire.apply(this, [hook, args]);
+      target.fire.apply(this, [hook, result]);
     };
   };
 }
