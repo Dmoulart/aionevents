@@ -8,35 +8,36 @@ export type Events = { [hook: string]: Event[] };
  *
  */
 export class EventEmitter {
+
+  /**
+ * The list of emitters that are wired to this emitter.
+ * It means that these wired emitters will receive the events fired by this emitter.
+ */
+  public wiredEmitters!: Array<EventEmitter>;
+
   /**
    * The events that are defined for a class instance
    *
    */
-  private instanceEvents!: Events;
+  private _instanceEvents!: Events;
 
   /**
    * The events that are defined for a class. Mainly used by decorators.
    *
    */
-  private classEvents!: Events;
-
-  /**
-   * The list of emitters that are wired to this emitter.
-   * It means that these wired emitters will receive the events fired by this emitter.
-   */
-  public wiredEmitters!: Array<EventEmitter>;
+  private _classEvents!: Events;
 
   constructor() {
-    this.instanceEvents ??= {};
+    this._instanceEvents ??= {};
 
     // At this point events might be already initialized with decorators even
     // if the instance is not created yet.
-    this.classEvents ??= {};
+    this._classEvents ??= {};
 
     this.wiredEmitters = [];
 
     // Register the events that are defined on the class by decorators.
-    for (const [hook, events] of Object.entries(this.classEvents)) {
+    for (const [hook, events] of Object.entries(this._classEvents)) {
       const len = events.length;
       for (let e = 0; e < len; e++) {
         this.on(hook, events[e].callback);
@@ -139,11 +140,11 @@ export class EventEmitter {
    * @returns this for chaining
    */
   public off(eventName: string, callback: EventCallback): EventEmitter {
-    if (!this.instanceEvents[eventName]) return this;
-    const eventToDelete = this.instanceEvents[eventName].find((event) => event.callback === callback);
+    if (!this._instanceEvents[eventName]) return this;
+    const eventToDelete = this._instanceEvents[eventName].find((event) => event.callback === callback);
     if (!eventToDelete) return this;
-    const index = this.instanceEvents[eventName].indexOf(eventToDelete);
-    this.instanceEvents[eventName].splice(index, 1);
+    const index = this._instanceEvents[eventName].indexOf(eventToDelete);
+    this._instanceEvents[eventName].splice(index, 1);
     return this;
   }
 
@@ -155,20 +156,20 @@ export class EventEmitter {
    * @returns this for chaining
    */
   public fire(eventName: string, params: Record<string, any> = {}): EventEmitter {
-    if (this.instanceEvents[eventName]) {
-      const len = this.instanceEvents[eventName].length;
+    if (this._instanceEvents[eventName]) {
+      const len = this._instanceEvents[eventName].length;
       for (let e = 0; e < len; e++) {
-        this.instanceEvents[eventName][e].callback.call(this, {
+        this._instanceEvents[eventName][e].callback.call(this, {
           ...params
         });
       }
     }
 
     for (let w = 0; w < this.wiredEmitters.length; w++) {
-      if (!this.wiredEmitters[w].instanceEvents[eventName]) continue;
-      for (let e = 0; e < this.wiredEmitters[w].instanceEvents[eventName].length; e++) {
-        if (!this.wiredEmitters[w].instanceEvents[eventName][e].callback) continue;
-        this.wiredEmitters[w].instanceEvents[eventName][e].callback.call(this.wiredEmitters[w], {
+      if (!this.wiredEmitters[w]._instanceEvents[eventName]) continue;
+      for (let e = 0; e < this.wiredEmitters[w]._instanceEvents[eventName].length; e++) {
+        if (!this.wiredEmitters[w]._instanceEvents[eventName][e].callback) continue;
+        this.wiredEmitters[w]._instanceEvents[eventName][e].callback.call(this.wiredEmitters[w], {
           ...params
         });
       }
@@ -186,25 +187,23 @@ export class EventEmitter {
    * @returns nothing
    */
   public static Fire(eventName: string, target: EventEmitter, params: Record<string, unknown> = {}): void {
-    if (target.instanceEvents[eventName]) {
-      const targetLen = target.instanceEvents[eventName].length;
+    if (target._instanceEvents[eventName]) {
+      const targetLen = target._instanceEvents[eventName].length;
       for (let e = 0; e < targetLen; e++) {
-        target.instanceEvents[eventName][e].callback.call(this, {
+        target._instanceEvents[eventName][e].callback.call(this, {
           ...params
         });
       }
     }
-    const wiredLen = target.instanceEvents[eventName].length;
+    const wiredLen = target._instanceEvents[eventName].length;
 
     for (let w = 0; w < wiredLen; w++) {
-      if (!target.wiredEmitters[w].instanceEvents[eventName]) continue;
-      const wiredEventsLen = target.wiredEmitters[w].instanceEvents[eventName].length;
+      if (!target.wiredEmitters[w]._instanceEvents[eventName]) continue;
+      const wiredEventsLen = target.wiredEmitters[w]._instanceEvents[eventName].length;
       for (let e = 0; e < wiredEventsLen; e++) {
-        target.wiredEmitters[w].instanceEvents[eventName][e]
-          .callback
-          .call(target.wiredEmitters[w], {
-            ...params
-          });
+        target.wiredEmitters[w]._instanceEvents[eventName][e].callback.call(target.wiredEmitters[w], {
+          ...params
+        });
       }
     }
   }
@@ -229,13 +228,13 @@ export class EventEmitter {
    */
   private static registerEvent(target: EventEmitter, event: Event, isClassEvent: boolean = false) {
     if (isClassEvent) {
-      target.classEvents ??= {};
-      target.classEvents[event.name] ??= [];
-      target.classEvents[event.name].push(event);
+      target._classEvents ??= {};
+      target._classEvents[event.name] ??= [];
+      target._classEvents[event.name].push(event);
     } else {
-      target.instanceEvents ??= {};
-      target.instanceEvents[event.name] ??= [];
-      target.instanceEvents[event.name].push(event);
+      target._instanceEvents ??= {};
+      target._instanceEvents[event.name] ??= [];
+      target._instanceEvents[event.name].push(event);
     }
   }
 
@@ -245,6 +244,6 @@ export class EventEmitter {
    * @returns events
    */
   public get events(): Events {
-    return { ...this.instanceEvents, ...this.classEvents };
+    return { ...this._instanceEvents, ...this._classEvents };
   }
 }

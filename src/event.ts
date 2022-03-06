@@ -14,7 +14,7 @@ export type EventOptions = {
  * The event callback function signature
  *
  */
-export type EventCallback = (args: { [arg: string]: any }) => void | (() => void);
+export type EventCallback = (args: { [arg: string]: any }) => any | (() => any);
 
 /**
  * The event object. It represents an event callback which is triggered by a specific hook.
