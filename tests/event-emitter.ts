@@ -29,6 +29,17 @@ describe('EventEmitter', function () {
       emitter.fire('test');
       assert.equal(count, 1);
     });
+    it('can fire events with params', function () {
+      const emitter = new EventEmitter();
+      const other = new EventEmitter();
+      emitter.wire(other);
+      let count = { val: 0 };
+      other.on('test', (countParam) => {
+        countParam.val += 1;
+      });
+      emitter.fire('test', count);
+      assert.equal(count.val, 1);
+    });
   });
   describe('on', function () {
     it('can listen to events from different emitter', function () {

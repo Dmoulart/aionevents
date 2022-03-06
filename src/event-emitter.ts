@@ -154,13 +154,13 @@ export class EventEmitter {
    * @param params
    * @returns this for chaining
    */
-  public fire(eventName: string, params: Record<string, any> = {}): EventEmitter {
+  public fire(eventName: string, params?: any): EventEmitter {
     if (this._instanceEvents[eventName]) {
       const len = this._instanceEvents[eventName].length;
       for (let e = 0; e < len; e++) {
-        this._instanceEvents[eventName][e].callback.call(this, {
-          ...params
-        });
+        this._instanceEvents[eventName][e].callback.call(this,
+          params
+        );
       }
     }
 
@@ -168,9 +168,9 @@ export class EventEmitter {
       if (!this.wiredEmitters[w]._instanceEvents[eventName]) continue;
       for (let e = 0; e < this.wiredEmitters[w]._instanceEvents[eventName].length; e++) {
         if (!this.wiredEmitters[w]._instanceEvents[eventName][e].callback) continue;
-        this.wiredEmitters[w]._instanceEvents[eventName][e].callback.call(this.wiredEmitters[w], {
-          ...params
-        });
+        this.wiredEmitters[w]._instanceEvents[eventName][e].callback.call(this.wiredEmitters[w],
+          params
+        );
       }
     }
     return this;
@@ -185,13 +185,13 @@ export class EventEmitter {
    * @param params
    * @returns nothing
    */
-  public static Fire(eventName: string, target: EventEmitter, params: Record<string, unknown> = {}): void {
+  public static Fire(eventName: string, target: EventEmitter, params?: any): void {
     if (target._instanceEvents[eventName]) {
       const targetLen = target._instanceEvents[eventName].length;
       for (let e = 0; e < targetLen; e++) {
-        target._instanceEvents[eventName][e].callback.call(this, {
-          ...params
-        });
+        target._instanceEvents[eventName][e].callback.call(this,
+          params
+        );
       }
     }
     const wiredLen = target._instanceEvents[eventName].length;
@@ -200,9 +200,9 @@ export class EventEmitter {
       if (!target.wiredEmitters[w]._instanceEvents[eventName]) continue;
       const wiredEventsLen = target.wiredEmitters[w]._instanceEvents[eventName].length;
       for (let e = 0; e < wiredEventsLen; e++) {
-        target.wiredEmitters[w]._instanceEvents[eventName][e].callback.call(target.wiredEmitters[w], {
-          ...params
-        });
+        target.wiredEmitters[w]._instanceEvents[eventName][e].callback.call(target.wiredEmitters[w],
+          params
+        );
       }
     }
   }
