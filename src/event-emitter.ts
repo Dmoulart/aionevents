@@ -8,11 +8,10 @@ export type Events = { [hook: string]: Event[] };
  *
  */
 export class EventEmitter {
-
   /**
- * The list of emitters that are wired to this emitter.
- * It means that these wired emitters will receive the events fired by this emitter.
- */
+   * The list of emitters that are wired to this emitter.
+   * It means that these wired emitters will receive the events fired by this emitter.
+   */
   public wiredEmitters!: Array<EventEmitter>;
 
   /**
