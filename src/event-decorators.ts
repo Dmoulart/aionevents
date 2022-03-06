@@ -25,7 +25,7 @@ export function Once(hook: string) {
 }
 
 /**
- * Wrap a function to fire an event at the end of it. 
+ * Wrap a function to fire an event at the end of it.
  * The return value of the function will be passed to the event as arguments.
  *
  * @param hook
